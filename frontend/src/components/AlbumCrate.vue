@@ -34,6 +34,12 @@ const selectedGenreNames = computed(() => {
     .join(', ');
 });
 
+const spotifyUrl = computed(() => {
+  if (!currentAlbum.value) return '#';
+  const query = `${currentAlbum.value.artist} ${currentAlbum.value.title}`;
+  return `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+});
+
 async function loadGenres() {
   try {
     genres.value = await fetchGenres();
@@ -234,16 +240,27 @@ onUnmounted(() => {
           </span>
           <span v-if="currentAlbum.nb_tracks" class="album-tracks">{{ currentAlbum.nb_tracks }} tracks</span>
         </div>
-        <a 
-          v-if="currentAlbum.deezer_link" 
-          :href="currentAlbum.deezer_link" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="deezer-link"
-          @click.stop
-        >
-          Listen on Deezer →
-        </a>
+        <div class="external-links">
+          <a 
+            v-if="currentAlbum.deezer_link" 
+            :href="currentAlbum.deezer_link" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="external-link deezer-link"
+            @click.stop
+          >
+            Listen on Deezer →
+          </a>
+          <a 
+            :href="spotifyUrl" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="external-link spotify-link"
+            @click.stop
+          >
+            Listen on Spotify →
+          </a>
+        </div>
       </div>
       
       <div class="controls">
@@ -586,9 +603,16 @@ onUnmounted(() => {
   border: 1px solid rgba(90, 138, 90, 0.3);
 }
 
-.deezer-link {
-  display: inline-block;
+.external-links {
+  display: flex;
+  gap: 0.75rem;
   margin-top: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.external-link {
+  display: inline-block;
   color: #5a8a5a;
   text-decoration: none;
   font-size: 0.95rem;
@@ -599,9 +623,19 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 
-.deezer-link:hover {
+.external-link:hover {
   background: rgba(90, 138, 90, 0.2);
   border-color: #5a8a5a;
+}
+
+.spotify-link {
+  color: #1db954;
+  border-color: rgba(29, 185, 84, 0.4);
+}
+
+.spotify-link:hover {
+  background: rgba(29, 185, 84, 0.2);
+  border-color: #1db954;
 }
 
 .controls {
