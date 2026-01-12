@@ -10,10 +10,17 @@ export async function fetchGenres(): Promise<Genre[]> {
   return response.json();
 }
 
-export async function fetchRandomAlbums(count: number = 10, genreIds?: number[]): Promise<AlbumCollection> {
+export async function fetchRandomAlbums(
+  count: number = 10, 
+  genreIds?: number[],
+  minTracks?: number
+): Promise<AlbumCollection> {
   let url = `${API_BASE}/albums/random?count=${count}`;
   if (genreIds && genreIds.length > 0) {
     url += `&genres=${genreIds.join(',')}`;
+  }
+  if (minTracks !== undefined && minTracks > 0) {
+    url += `&min_tracks=${minTracks}`;
   }
   const response = await fetch(url);
   if (!response.ok) {

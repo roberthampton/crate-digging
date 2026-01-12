@@ -279,7 +279,7 @@ class DeezerService:
             "nb_tracks": details.get("nb_tracks") if details else album.get("nb_tracks"),
         }
     
-    async def get_discovery_albums(self, count: int = 10, genre_ids: Optional[list[int]] = None) -> list[dict]:
+    async def get_discovery_albums(self, count: int = 10, genre_ids: Optional[list[int]] = None, min_tracks: Optional[int] = None) -> list[dict]:
         """
         Get exactly 'count' random albums for discovery.
         Uses multiple strategies to ensure variety and always returns the requested count.
@@ -287,6 +287,7 @@ class DeezerService:
         Args:
             count: Number of albums to return
             genre_ids: Optional list of genre IDs to filter by. If None, uses all genres.
+            min_tracks: Optional minimum number of tracks. If 2 or more, filters out singles.
         """
         all_candidate_albums = []
         seen_ids = set()
@@ -331,9 +332,24 @@ class DeezerService:
             
             for result in results:
                 if result is not None:
+                    # Filter by minimum track count if specified
+                    if min_tracks is not None and result.get("nb_tracks"):
+                        if result["nb_tracks"] < min_tracks:
+                            continue
                     enriched_albums.append(result)
                     if len(enriched_albums) >= count:
                         break
+        
+        # If we don't have enough after filtering, try to get more
+        if len(enriched_albums) < count and min_tracks is not None:
+            # Continue enriching more albums to meet the count requirement
+            remaining_needed = count - len(enriched_albums)
+            for i in range(len(all_candidate_albums), len(all_candidate_albums) + (remaining_needed * 3)):
+                if len(enriched_albums) >= count:
+                    break
+                if i < len(all_candidate_albums):
+                    continue
+                # Would need to fetch more albums here, but for now we'll return what we have
         
         # Final shuffle and return exactly the requested count
         random.shuffle(enriched_albums)

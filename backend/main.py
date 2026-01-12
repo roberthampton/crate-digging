@@ -88,7 +88,8 @@ def get_genres():
 @app.get("/albums/random", response_model=AlbumCollection)
 async def get_random_albums(
     count: int = Query(default=10, ge=1, le=30),
-    genres: Optional[str] = Query(default=None, description="Comma-separated genre IDs to filter by")
+    genres: Optional[str] = Query(default=None, description="Comma-separated genre IDs to filter by"),
+    min_tracks: Optional[int] = Query(default=None, ge=1, description="Minimum number of tracks (e.g., 2 to exclude singles)")
 ):
     """Get a random selection of albums for crate digging from Deezer."""
     genre_ids = None
@@ -98,7 +99,7 @@ async def get_random_albums(
         except ValueError:
             pass
     
-    albums = await deezer_service.get_discovery_albums(count=count, genre_ids=genre_ids)
+    albums = await deezer_service.get_discovery_albums(count=count, genre_ids=genre_ids, min_tracks=min_tracks)
     
     return AlbumCollection(
         albums=[Album(**album) for album in albums],

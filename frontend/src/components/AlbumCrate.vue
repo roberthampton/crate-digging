@@ -19,6 +19,9 @@ const genres = ref<Genre[]>([]);
 const selectedGenres = ref<number[]>([]);
 const showGenreFilter = ref(false);
 
+// Albums vs Singles filtering
+const showOnlyAlbums = ref(false);
+
 const currentAlbum = computed(() => albums.value[currentIndex.value]);
 const prevAlbum = computed(() => albums.value[currentIndex.value - 1]);
 const nextAlbum = computed(() => albums.value[currentIndex.value + 1]);
@@ -40,6 +43,9 @@ async function loadGenres() {
 }
 
 function toggleGenre(genreId: number) {
+  // Stop audio when changing filters
+  stopPreview();
+  
   const index = selectedGenres.value.indexOf(genreId);
   if (index === -1) {
     selectedGenres.value.push(genreId);
@@ -53,12 +59,16 @@ function clearGenreFilter() {
 }
 
 async function loadAlbums() {
+  // Stop any playing audio when loading new albums
+  stopPreview();
+  
   isLoading.value = true;
   error.value = null;
   showGenreFilter.value = false;
   try {
     const genreIds = selectedGenres.value.length > 0 ? selectedGenres.value : undefined;
-    const data = await fetchRandomAlbums(10, genreIds);
+    const minTracks = showOnlyAlbums.value ? 2 : undefined; // 2+ tracks = album, 1 track = single
+    const data = await fetchRandomAlbums(10, genreIds, minTracks);
     albums.value = data.albums;
     currentIndex.value = 0;
   } catch (e) {
@@ -256,6 +266,14 @@ onUnmounted(() => {
           🔀 Shuffle New Crate
         </button>
         
+        <button 
+          @click="showOnlyAlbums = !showOnlyAlbums; loadAlbums()" 
+          class="filter-btn albums-toggle-btn" 
+          :class="{ active: showOnlyAlbums }"
+          title="Toggle between all releases and albums only (excludes singles)">
+          {{ showOnlyAlbums ? '💿 Albums Only' : '📀 All Releases' }}
+        </button>
+        
         <button @click="showGenreFilter = !showGenreFilter" class="filter-btn" :class="{ active: selectedGenres.length > 0 }">
           🎸 {{ selectedGenres.length > 0 ? `${selectedGenres.length} Genre${selectedGenres.length > 1 ? 's' : ''}` : 'Filter' }}
         </button>
@@ -282,8 +300,10 @@ onUnmounted(() => {
         </button>
       </div>
       
-      <p v-if="selectedGenres.length > 0" class="active-filter-hint">
-        Filtering: {{ selectedGenreNames }}
+      <p v-if="selectedGenres.length > 0 || showOnlyAlbums" class="active-filter-hint">
+        <span v-if="showOnlyAlbums">📀 Albums Only</span>
+        <span v-if="showOnlyAlbums && selectedGenres.length > 0"> • </span>
+        <span v-if="selectedGenres.length > 0">Filtering: {{ selectedGenreNames }}</span>
       </p>
       
       <p class="hint">Click album to play/pause • Drag or use arrow keys to browse • Space to toggle</p>
@@ -657,6 +677,17 @@ onUnmounted(() => {
 .filter-btn.active {
   background: rgba(255, 107, 53, 0.2);
   border-color: #f7931e;
+}
+
+.albums-toggle-btn {
+  font-size: 0.95rem;
+}
+
+.albums-toggle-btn.active {
+  background: rgba(255, 107, 53, 0.3);
+  border-color: #ff6b35;
+  color: #ff6b35;
+  font-weight: 700;
 }
 
 .genre-filter {
