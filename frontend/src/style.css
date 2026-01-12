@@ -1,15 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --color-bg-deep: #0d0d14;
-  --color-bg-main: #1a1a2e;
-  --color-bg-card: #252538;
-  --color-accent-primary: #ff6b35;
-  --color-accent-secondary: #f7931e;
-  --color-accent-warm: #e8d5b7;
-  --color-text-primary: #f0f0f0;
-  --color-text-secondary: #a0a0a0;
-  --color-text-muted: #666666;
+  /* Brown tones - record store warmth */
+  --color-bg-deep: #2a1f1a;
+  --color-bg-main: #3d2e26;
+  --color-bg-card: #4a3a32;
+  --color-brown-light: #6b5548;
+  --color-brown-warm: #8b6f5f;
+  
+  /* Green accents - natural, trendy */
+  --color-green-dark: #2d4a2d;
+  --color-green-medium: #4a6b4a;
+  --color-green-light: #6b8b6b;
+  --color-green-accent: #5a8a5a;
+  
+  /* White and cream */
+  --color-white: #f5f5f0;
+  --color-cream: #e8e6e0;
+  --color-cream-warm: #d4d0c4;
+  
+  /* Accent colors */
+  --color-accent-primary: #5a8a5a;
+  --color-accent-secondary: #6b8b6b;
+  --color-accent-warm: #8b6f5f;
+  
+  /* Text colors */
+  --color-text-primary: #f5f5f0;
+  --color-text-secondary: #d4d0c4;
+  --color-text-muted: #8b6f5f;
 }
 
 * {
@@ -46,9 +64,9 @@ body::before {
   width: 100%;
   height: 100%;
   background: 
-    radial-gradient(ellipse at 20% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(247, 147, 30, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(232, 213, 183, 0.03) 0%, transparent 70%);
+    radial-gradient(ellipse at 20% 20%, rgba(90, 138, 90, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 111, 95, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(212, 208, 196, 0.03) 0%, transparent 70%);
   pointer-events: none;
   z-index: -1;
 }
@@ -87,22 +105,22 @@ body::after {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-primary);
+  background: var(--color-green-accent);
 }
 
 /* Selection styling */
 ::selection {
-  background: rgba(255, 107, 53, 0.3);
+  background: rgba(90, 138, 90, 0.3);
   color: var(--color-text-primary);
 }
 
 /* Focus styling */
 *:focus-visible {
-  outline: 2px solid var(--color-accent-primary);
+  outline: 2px solid var(--color-green-accent);
   outline-offset: 2px;
 }
 
 button:focus-visible {
-  outline: 2px solid var(--color-accent-primary);
+  outline: 2px solid var(--color-green-accent);
   outline-offset: 2px;
 }

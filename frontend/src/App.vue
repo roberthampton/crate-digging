@@ -27,7 +27,7 @@ import AlbumCrate from './components/AlbumCrate.vue';
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #0d0d14;
+  background: #2a1f1a;
 }
 
 .header {
@@ -38,7 +38,7 @@ import AlbumCrate from './components/AlbumCrate.vue';
 .logo {
   font-family: 'Instrument Serif', Georgia, serif;
   font-size: 2.8rem;
-  color: #e8d5b7;
+  color: #d4d0c4;
   margin: 0;
   display: flex;
   align-items: center;
@@ -52,7 +52,7 @@ import AlbumCrate from './components/AlbumCrate.vue';
 
 .tagline {
   font-size: 1.1rem;
-  color: #888;
+  color: #8b6f5f;
   margin: 0.5rem 0 0;
   font-style: italic;
 }
@@ -67,7 +67,7 @@ import AlbumCrate from './components/AlbumCrate.vue';
 .footer {
   text-align: center;
   padding: 1.5rem;
-  color: #555;
+  color: #8b6f5f;
   font-size: 0.9rem;
 }
 

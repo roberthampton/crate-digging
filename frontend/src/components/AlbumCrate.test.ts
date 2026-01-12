@@ -72,7 +72,7 @@ describe('AlbumCrate Component', () => {
       mount(AlbumCrate)
       await flushPromises()
 
-      expect(api.fetchRandomAlbums).toHaveBeenCalledWith(10, undefined)
+      expect(api.fetchRandomAlbums).toHaveBeenCalledWith(10, undefined, undefined)
     })
 
     it('should fetch genres on mount', async () => {

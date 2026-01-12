@@ -226,7 +226,12 @@ onUnmounted(() => {
         <p class="album-artist">{{ currentAlbum.artist }}</p>
         <div class="album-meta">
           <span v-if="currentAlbum.year" class="album-year">{{ currentAlbum.year }}</span>
-          <span v-if="currentAlbum.genre" class="album-genre">{{ currentAlbum.genre }}</span>
+          <span 
+            v-for="(genre, idx) in (currentAlbum.genres || (currentAlbum.genre ? [currentAlbum.genre] : []))" 
+            :key="idx"
+            class="album-genre">
+            {{ genre }}
+          </span>
           <span v-if="currentAlbum.nb_tracks" class="album-tracks">{{ currentAlbum.nb_tracks }} tracks</span>
         </div>
         <a 
@@ -266,13 +271,17 @@ onUnmounted(() => {
           🔀 Shuffle New Crate
         </button>
         
-        <button 
-          @click="showOnlyAlbums = !showOnlyAlbums; loadAlbums()" 
-          class="filter-btn albums-toggle-btn" 
-          :class="{ active: showOnlyAlbums }"
-          title="Toggle between all releases and albums only (excludes singles)">
-          {{ showOnlyAlbums ? '💿 Albums Only' : '📀 All Releases' }}
-        </button>
+        <div class="release-type-selector">
+          <label for="release-type" class="release-type-label">Release Type:</label>
+          <select 
+            id="release-type"
+            v-model="showOnlyAlbums" 
+            @change="loadAlbums()"
+            class="release-type-dropdown">
+            <option :value="false">📀 All Releases (Albums + Singles)</option>
+            <option :value="true">💿 Albums Only (2+ tracks)</option>
+          </select>
+        </div>
         
         <button @click="showGenreFilter = !showGenreFilter" class="filter-btn" :class="{ active: selectedGenres.length > 0 }">
           🎸 {{ selectedGenres.length > 0 ? `${selectedGenres.length} Genre${selectedGenres.length > 1 ? 's' : ''}` : 'Filter' }}
@@ -339,8 +348,8 @@ onUnmounted(() => {
 .loading-spinner {
   width: 60px;
   height: 60px;
-  border: 4px solid rgba(255, 107, 53, 0.2);
-  border-top-color: #ff6b35;
+  border: 4px solid rgba(90, 138, 90, 0.2);
+  border-top-color: #5a8a5a;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -352,7 +361,7 @@ onUnmounted(() => {
 .loading p {
   font-family: 'Instrument Serif', Georgia, serif;
   font-size: 1.4rem;
-  color: #e8d5b7;
+  color: #d4d0c4;
   font-style: italic;
 }
 
@@ -361,14 +370,14 @@ onUnmounted(() => {
 }
 
 .error p {
-  color: #ff6b6b;
+  color: #8b6f5f;
   margin-bottom: 1rem;
   font-size: 1.1rem;
 }
 
 .retry-btn {
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
-  color: #1a1a2e;
+  background: linear-gradient(135deg, #5a8a5a, #6b8b6b);
+  color: #f5f5f0;
   border: none;
   padding: 0.8rem 2rem;
   font-size: 1rem;
@@ -380,7 +389,7 @@ onUnmounted(() => {
 
 .retry-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 8px 25px rgba(90, 138, 90, 0.4);
 }
 
 .crate-viewer {
@@ -436,15 +445,15 @@ onUnmounted(() => {
 
 .album-card.current {
   z-index: 10;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(90, 138, 90, 0.3);
 }
 
 .album-card.current:hover {
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(255, 107, 53, 0.5);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(90, 138, 90, 0.5);
 }
 
 .album-card.current.playing {
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 107, 53, 0.6);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 30px rgba(90, 138, 90, 0.6);
 }
 
 .album-vinyl {
@@ -477,12 +486,12 @@ onUnmounted(() => {
   position: absolute;
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  background: linear-gradient(135deg, #5a8a5a, #6b8b6b);
   border-radius: 50%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  box-shadow: 0 0 10px rgba(90, 138, 90, 0.5);
 }
 
 .album-vinyl::after {
@@ -523,7 +532,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  color: #ff6b35;
+  color: #5a8a5a;
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 3;
@@ -536,7 +545,7 @@ onUnmounted(() => {
 
 .play-indicator.active {
   opacity: 1;
-  background: rgba(255, 107, 53, 0.2);
+  background: rgba(90, 138, 90, 0.2);
 }
 
 .album-info {
@@ -547,14 +556,14 @@ onUnmounted(() => {
 .album-title {
   font-family: 'Instrument Serif', Georgia, serif;
   font-size: 2rem;
-  color: #e8d5b7;
+  color: #d4d0c4;
   margin: 0 0 0.5rem 0;
   line-height: 1.2;
 }
 
 .album-artist {
   font-size: 1.2rem;
-  color: #ff6b35;
+  color: #5a8a5a;
   margin: 0 0 0.8rem 0;
   font-weight: 500;
 }
@@ -569,30 +578,30 @@ onUnmounted(() => {
 .album-year,
 .album-genre,
 .album-tracks {
-  background: rgba(255, 107, 53, 0.15);
-  color: #e8d5b7;
+  background: rgba(90, 138, 90, 0.15);
+  color: #d4d0c4;
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-size: 0.85rem;
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  border: 1px solid rgba(90, 138, 90, 0.3);
 }
 
 .deezer-link {
   display: inline-block;
   margin-top: 1rem;
-  color: #ff6b35;
+  color: #5a8a5a;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
   padding: 0.5rem 1rem;
-  border: 1px solid rgba(255, 107, 53, 0.4);
+  border: 1px solid rgba(90, 138, 90, 0.4);
   border-radius: 20px;
   transition: all 0.3s ease;
 }
 
 .deezer-link:hover {
-  background: rgba(255, 107, 53, 0.2);
-  border-color: #ff6b35;
+  background: rgba(90, 138, 90, 0.2);
+  border-color: #5a8a5a;
 }
 
 .controls {
@@ -603,8 +612,8 @@ onUnmounted(() => {
 
 .nav-btn {
   background: transparent;
-  border: 2px solid #ff6b35;
-  color: #ff6b35;
+  border: 2px solid #5a8a5a;
+  color: #5a8a5a;
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -614,8 +623,8 @@ onUnmounted(() => {
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: #ff6b35;
-  color: #1a1a2e;
+  background: #5a8a5a;
+  color: #f5f5f0;
   transform: scale(1.05);
 }
 
@@ -642,8 +651,8 @@ onUnmounted(() => {
 }
 
 .shuffle-btn {
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
-  color: #1a1a2e;
+  background: linear-gradient(135deg, #5a8a5a, #6b8b6b);
+  color: #f5f5f0;
   border: none;
   padding: 1rem 2rem;
   font-size: 1.1rem;
@@ -655,13 +664,13 @@ onUnmounted(() => {
 
 .shuffle-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 10px 30px rgba(90, 138, 90, 0.4);
 }
 
 .filter-btn {
   background: transparent;
-  border: 2px solid #ff6b35;
-  color: #ff6b35;
+  border: 2px solid #5a8a5a;
+  color: #5a8a5a;
   padding: 1rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -671,28 +680,58 @@ onUnmounted(() => {
 }
 
 .filter-btn:hover {
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(90, 138, 90, 0.1);
 }
 
 .filter-btn.active {
-  background: rgba(255, 107, 53, 0.2);
-  border-color: #f7931e;
+  background: rgba(90, 138, 90, 0.2);
+  border-color: #6b8b6b;
 }
 
-.albums-toggle-btn {
+.release-type-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.release-type-label {
+  color: #d4d0c4;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.release-type-dropdown {
+  background: rgba(90, 138, 90, 0.1);
+  border: 2px solid #5a8a5a;
+  color: #d4d0c4;
+  padding: 0.8rem 1.2rem;
   font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a8a5a' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
 }
 
-.albums-toggle-btn.active {
-  background: rgba(255, 107, 53, 0.3);
-  border-color: #ff6b35;
-  color: #ff6b35;
-  font-weight: 700;
+.release-type-dropdown:hover {
+  background-color: rgba(90, 138, 90, 0.2);
+  border-color: #6b8b6b;
+}
+
+.release-type-dropdown:focus {
+  outline: none;
+  border-color: #6b8b6b;
+  box-shadow: 0 0 0 3px rgba(90, 138, 90, 0.2);
 }
 
 .genre-filter {
-  background: rgba(30, 30, 50, 0.95);
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: rgba(61, 46, 38, 0.95);
+  border: 1px solid rgba(90, 138, 90, 0.3);
   border-radius: 16px;
   padding: 1.5rem;
   margin-top: 1rem;
@@ -706,14 +745,14 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  color: #e8d5b7;
+  color: #d4d0c4;
   font-weight: 600;
 }
 
 .clear-btn {
   background: transparent;
   border: none;
-  color: #ff6b35;
+  color: #5a8a5a;
   font-size: 0.85rem;
   cursor: pointer;
   padding: 0.3rem 0.6rem;
@@ -722,7 +761,7 @@ onUnmounted(() => {
 }
 
 .clear-btn:hover {
-  background: rgba(255, 107, 53, 0.2);
+  background: rgba(90, 138, 90, 0.2);
 }
 
 .genre-grid {
@@ -734,8 +773,8 @@ onUnmounted(() => {
 
 .genre-chip {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #a0a0a0;
+  border: 1px solid rgba(212, 208, 196, 0.15);
+  color: #8b6f5f;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -744,20 +783,20 @@ onUnmounted(() => {
 }
 
 .genre-chip:hover {
-  border-color: rgba(255, 107, 53, 0.5);
-  color: #e8d5b7;
+  border-color: rgba(90, 138, 90, 0.5);
+  color: #d4d0c4;
 }
 
 .genre-chip.selected {
-  background: rgba(255, 107, 53, 0.25);
-  border-color: #ff6b35;
-  color: #ff6b35;
+  background: rgba(90, 138, 90, 0.25);
+  border-color: #5a8a5a;
+  color: #5a8a5a;
 }
 
 .apply-filter-btn {
   width: 100%;
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
-  color: #1a1a2e;
+  background: linear-gradient(135deg, #5a8a5a, #6b8b6b);
+  color: #f5f5f0;
   border: none;
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
@@ -769,23 +808,23 @@ onUnmounted(() => {
 
 .apply-filter-btn:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 8px 20px rgba(90, 138, 90, 0.3);
 }
 
 .active-filter-hint {
   font-size: 0.85rem;
-  color: #ff6b35;
+  color: #5a8a5a;
   text-align: center;
   margin-top: 0.8rem;
   padding: 0.4rem 1rem;
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(90, 138, 90, 0.1);
   border-radius: 15px;
   display: inline-block;
 }
 
 .hint {
   font-size: 0.85rem;
-  color: #666;
+  color: #8b6f5f;
   text-align: center;
   margin-top: 1rem;
 }
@@ -795,19 +834,19 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   margin-top: 1.5rem;
-  color: #555;
+  color: #8b6f5f;
   font-size: 0.8rem;
 }
 
 .deezer-logo {
   width: 60px;
   height: 24px;
-  color: #555;
+  color: #8b6f5f;
   transition: color 0.3s ease;
 }
 
 .powered-by:hover .deezer-logo {
-  color: #ff6b35;
+  color: #5a8a5a;
 }
 
 @media (max-width: 480px) {

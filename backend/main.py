@@ -15,7 +15,8 @@ class Album(BaseModel):
     cover_url: str
     preview_url: str
     year: Optional[str] = None
-    genre: Optional[str] = None
+    genre: Optional[str] = None  # Deprecated - kept for backwards compatibility
+    genres: Optional[list[str]] = None  # All genres for the album
     deezer_id: int
     deezer_link: Optional[str] = None
     nb_tracks: Optional[int] = None

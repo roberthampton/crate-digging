@@ -31,16 +31,30 @@ GENRES = {
 # List of all genre IDs
 GENRE_IDS = list(GENRES.keys())
 
-# Random search terms for discovery variety
+# Random search terms for discovery variety - expanded and more diverse
 SEARCH_TERMS = [
-    "love", "night", "dream", "sun", "moon", "heart", "life", "time",
-    "fire", "water", "sky", "rain", "blue", "red", "gold", "black",
-    "white", "dark", "light", "new", "old", "wild", "free", "lost",
-    "found", "home", "road", "city", "street", "summer", "winter",
-    "spring", "fall", "dance", "soul", "funk", "rock", "jazz", "beat",
-    "sound", "rhythm", "melody", "voice", "song", "music", "album",
-    "world", "earth", "star", "wave", "electric", "acoustic", "live",
-    "remix", "original", "classic", "modern", "future", "past", "now",
+    # Emotions & feelings
+    "love", "hate", "joy", "pain", "hope", "fear", "peace", "rage",
+    # Nature
+    "sun", "moon", "star", "ocean", "mountain", "river", "forest", "desert", "wind", "rain", "snow", "storm",
+    # Colors
+    "blue", "red", "gold", "black", "white", "green", "purple", "silver", "crimson", "azure",
+    # Time
+    "dawn", "dusk", "midnight", "noon", "morning", "evening", "yesterday", "tomorrow", "today",
+    # Abstract concepts
+    "freedom", "truth", "beauty", "chaos", "order", "silence", "noise", "void", "infinity",
+    # Actions
+    "dance", "run", "fly", "fall", "rise", "break", "build", "destroy", "create", "escape",
+    # Places
+    "home", "road", "city", "street", "island", "valley", "bridge", "tower", "castle", "temple",
+    # Music terms
+    "rhythm", "melody", "harmony", "beat", "bass", "treble", "chord", "note", "scale", "tune",
+    # Descriptive
+    "ancient", "modern", "eternal", "temporary", "sacred", "profane", "divine", "mortal",
+    # Objects
+    "crown", "sword", "shield", "key", "door", "window", "mirror", "candle", "flame", "ash",
+    # States
+    "awake", "asleep", "alive", "dead", "lost", "found", "hidden", "visible", "empty", "full",
 ]
 
 
@@ -202,32 +216,52 @@ class DeezerService:
         return albums
     
     async def _collect_albums_from_search(self, target_count: int) -> list[dict]:
-        """Collect albums using random search queries."""
+        """Collect albums using random search queries with improved variety."""
         albums = []
         seen_ids = set()
+        used_terms = set()
         
-        # Pick random search terms
-        search_terms = random.sample(SEARCH_TERMS, min(10, len(SEARCH_TERMS)))
+        # Pick more diverse search terms - use more terms but fewer results per term
+        num_terms = min(20, len(SEARCH_TERMS))
+        search_terms = random.sample(SEARCH_TERMS, num_terms)
         
-        # Also add some random letter combinations for variety
-        for _ in range(3):
+        # Add random letter combinations for additional variety
+        for _ in range(5):
             random_chars = ''.join(random.choices(string.ascii_lowercase, k=random.randint(2, 4)))
             search_terms.append(random_chars)
         
+        # Add random numbers for even more variety
+        for _ in range(3):
+            random_num = str(random.randint(1, 999))
+            search_terms.append(random_num)
+        
         random.shuffle(search_terms)
+        
+        # Limit albums per search term to avoid clustering
+        albums_per_term = max(2, target_count // 10)
         
         for term in search_terms:
             if len(albums) >= target_count:
                 break
             
-            # Use random offset for more variety
-            offset = random.randint(0, 100)
+            # Skip if we've used this term already
+            if term.lower() in used_terms:
+                continue
+            used_terms.add(term.lower())
+            
+            # Use random offset for more variety - wider range
+            offset = random.randint(0, 200)
             search_results = await self.search_albums(term, index=offset)
             
+            # Take only a few albums from each search to maximize variety
+            albums_from_term = 0
             for album in search_results:
+                if albums_from_term >= albums_per_term:
+                    break
                 if album["id"] not in seen_ids:
                     seen_ids.add(album["id"])
                     albums.append(album)
+                    albums_from_term += 1
                     if len(albums) >= target_count:
                         break
         
@@ -266,6 +300,14 @@ class DeezerService:
         if not cover_url:
             return None
         
+        # Extract all genres
+        all_genres = []
+        if details and details.get("genres", {}).get("data"):
+            all_genres = [g.get("name") for g in details["genres"]["data"] if g.get("name")]
+        
+        # Keep first genre for backwards compatibility
+        first_genre = all_genres[0] if all_genres else None
+        
         return {
             "id": album_id,
             "title": details.get("title", album.get("title", "Unknown Album")) if details else album.get("title", "Unknown Album"),
@@ -273,7 +315,8 @@ class DeezerService:
             "cover_url": cover_url,
             "preview_url": preview_url,
             "year": details.get("release_date", "")[:4] if details and details.get("release_date") else None,
-            "genre": details.get("genres", {}).get("data", [{}])[0].get("name") if details and details.get("genres", {}).get("data") else None,
+            "genre": first_genre,  # Deprecated - kept for backwards compatibility
+            "genres": all_genres if all_genres else None,
             "deezer_id": album_id,
             "deezer_link": details.get("link", album.get("link", "")) if details else album.get("link", ""),
             "nb_tracks": details.get("nb_tracks") if details else album.get("nb_tracks"),
